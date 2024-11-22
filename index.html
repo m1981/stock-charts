@@ -225,5 +225,56 @@
             Reset to Default Stocks
         </button>
     </div>
+    
+<!-- Export/Import buttons -->
+    <div style="margin-top: 10px;">
+        <button onclick="exportData()">Export Data</button>
+        <input type="file" id="importFile" style="display: none;" onchange="importData(event)">
+        <button onclick="document.getElementById('importFile').click()">Import Data</button>
+    </div>
+
+    <script>
+        // Function to export data
+        function exportData() {
+            const data = JSON.stringify(stocks, null, 2);
+            const blob = new Blob([data], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+            
+            a.href = url;
+            a.download = `stocks-backup-${timestamp}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // Function to import data
+        function importData(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const importedData = JSON.parse(e.target.result);
+                        if (confirm('Are you sure you want to import this data? Current data will be replaced.')) {
+                            stocks = importedData;
+                            saveStocks();
+                            renderCharts();
+                            alert('Data imported successfully!');
+                        }
+                    } catch (error) {
+                        alert('Error importing data. Please make sure the file is valid JSON.');
+                    }
+                };
+                reader.readAsText(file);
+            }
+            // Reset the input so the same file can be imported again
+            event.target.value = '';
+        }
+    </script>
+</body>    
+</body>    
 </body>
 </html>
