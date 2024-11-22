@@ -1,118 +1,116 @@
-<html lang="en">
+<!DOCTYPE html>
+<html>
 <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=3.0">
-        <style>
-            body{
-                font-family: calibri;
-            }
-            .chart_wrapper {
-            	float: left;
-            }
-            .chart {
-            	width: 100%;
+    <style>
+        .chart-container {
+            border: 1px solid #ccc;
+        }
+        .chart {
+            max-width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div id="stockChartsContainer"></div>
+
+    <script>
+        // Initialize stocks from localStorage or use default list
+        const defaultStocks = [
+            { symbol: 'VWRD.L' },
+            { symbol: 'CNDX.L' },
+            { symbol: 'SGLP.L' }
+        ];
+
+        let stocks = JSON.parse(localStorage.getItem('stockList')) || defaultStocks;
+
+        // Save stocks to localStorage
+        function saveStocks() {
+            localStorage.setItem('stockList', JSON.stringify(stocks));
+        }
+
+        // Chart URL templates
+        const chartUrls = {
+            weekly: 'https://stockcharts.com/c-sc/sc?s={symbol}&p=W&yr=1&mn=0&dy=0&i=t7370400895c&r=1732292661916',
+            daily: 'https://stockcharts.com/c-sc/sc?s={symbol}&p=D&yr=0&mn=3&dy=0&i=t0460342548c&r=1732293548924'
+        };
+
+        // Function to create chart HTML
+        function generateChartHTML(stock) {
+            return `
+                <tr>
+                    <td class="chart-container">
+                        <h2>${stock.symbol} 
+                            <button onclick="removeStock('${stock.symbol}')" style="color: red;">×</button>
+                        </h2>
+                        <img class="chart" src="${chartUrls.weekly.replace('{symbol}', stock.symbol)}" alt="${stock.symbol} Weekly">
+                    </td>
+                    <td class="chart-container">
+                        <h2>${stock.symbol}</h2>
+                        <img class="chart" src="${chartUrls.daily.replace('{symbol}', stock.symbol)}" alt="${stock.symbol} Daily">
+                    </td>
+                </tr>
+            `;
+        }
+
+        // Function to render all charts
+        function renderCharts() {
+            const container = document.getElementById('stockChartsContainer');
+            const tableHTML = `
+                <table>
+                    ${stocks.map(stock => generateChartHTML(stock)).join('')}
+                </table>
+            `;
+            container.innerHTML = tableHTML;
+        }
+
+        // Function to add new stock
+        function addNewStock(symbol) {
+            if (!symbol) return;
+            
+            // Check if stock already exists
+            if (!stocks.some(stock => stock.symbol === symbol)) {
+                stocks.push({ symbol });
+                saveStocks();
+                renderCharts();
+            } else {
+                alert('This stock is already in your list!');
             }
             
-          .clearfix::after {
-              clear: both;
-              content: '';
-              display: block;
-          }            
-        </style>
-<!--
-To EDIT charts edit URL
-from
-"c-sc/sc?s"
-to 
-"sc3/ui/?s"
--->
-</head>
-<body> 
-<table border=1>
-<tr>
-  <td>
-    <h2>VWRD.L</h2>
-    <img class="chart" src="https://stockcharts.com/c-sc/sc?s=VWRD.L&p=W&yr=1&mn=0&dy=0&i=t7370400895c&r=1732292661916">
-  </td>
-  <td>
-    <h2>VWRD.L</h2>
-    <img class="chart" src="https://stockcharts.com/c-sc/sc?s=VWRD.L&p=D&yr=0&mn=3&dy=0&i=t0460342548c&r=1732293548924">
-  </td>
-</tr>
+            // Clear input field
+            document.getElementById('newStockSymbol').value = '';
+        }
 
-<tr>
-  <td>
-    <h2>CNDX.L</h2>
-    <img class="chart" src="https://stockcharts.com/c-sc/sc?s=CNDX.L&p=W&yr=1&mn=0&dy=0&i=t7370400895c&r=1732292661916">
-  </td>
-  <td>
-    <h2>CNDX.L</h2>
-    <img class="chart" src="https://stockcharts.com/c-sc/sc?s=CNDX.L&p=D&yr=0&mn=3&dy=0&i=t0460342548c&r=1732293548924">
-  </td>
-</tr>
+        // Function to remove stock
+        function removeStock(symbol) {
+            stocks = stocks.filter(stock => stock.symbol !== symbol);
+            saveStocks();
+            renderCharts();
+        }
 
-<tr>
-  <td>
-    <h2>SGLP.L</h2>
-    <img class="chart" src="https://stockcharts.com/c-sc/sc?s=SGLP.L&p=W&yr=1&mn=0&dy=0&i=t7370400895c&r=1732292661916">
-    
-  
-  </td>
-  <td>
-    <h2>SGLP.L</h2>                                
-    <img class="chart" src="https://stockcharts.com/c-sc/sc?s=SGLP.L&p=D&yr=0&mn=3&dy=0&i=t0460342548c&r=1732293548924">
-  </td>
+        // Initial render
+        renderCharts();
 
-</tr>
+        // Optional: Add auto-refresh functionality
+        function autoRefresh(minutes) {
+            setInterval(() => {
+                renderCharts();
+            }, minutes * 60 * 1000);
+        }
+    </script>
 
-     
+    <!-- Form to add new stocks -->
+    <div style="margin-top: 20px;">
+        <input type="text" id="newStockSymbol" placeholder="Enter stock symbol">
+        <button onclick="addNewStock(document.getElementById('newStockSymbol').value)">
+            Add Stock
+        </button>
+    </div>
 
-<tr>
-  <td>
-    <h2>BILL </h2>
-    <img class="chart" src="https://stockcharts.com/c-sc/sc?s=BILL&p=W&yr=1&mn=0&dy=0&i=t7370400895c&r=1732292661916">
-  </td>
-  <td>
-  </td>
-</tr>
-
-<tr>
-  <td>
-    <h2>CRM </h2>
-    <img class="chart" src="https://stockcharts.com/c-sc/sc?s=CRM&p=W&yr=1&mn=0&dy=0&i=t7370400895c&r=1732292661916">
-  </td>
-  <td>
-  </td>
-</tr>
-
-<tr>
-  <td>
-    <h2>DJCO</h2>
-    <img class="chart" src="https://stockcharts.com/c-sc/sc?s=DJCO&p=W&yr=1&mn=0&dy=0&i=t7370400895c&r=1732292661916">
-  </td>
-  <td>
-  </td>
-</tr>
-
-<tr>
-  <td>
-    <h2>FTNT</h2>
-    <img class="chart" src="https://stockcharts.com/c-sc/sc?s=FTNT&p=W&yr=1&mn=0&dy=0&i=t7370400895c&r=1732292661916">
-  </td>
-  <td>
-  </td>
-</tr>
-    
-<tr>
-  <td>
-    <h2>Microsoft</h2>
-    <img class="chart" src="https://stockcharts.com/c-sc/sc?s=MSFT&p=W&yr=1&mn=0&dy=0&i=t7370400895c&r=1732292661916">
-  </td>
-  <td>
-  </td>
-</tr>
-
-</table>
+    <!-- Reset button -->
+    <div style="margin-top: 10px;">
+        <button onclick="if(confirm('Reset to default stocks?')){localStorage.clear();stocks=defaultStocks;saveStocks();renderCharts();}">
+            Reset to Default Stocks
+        </button>
+    </div>
 </body>
 </html>
-
